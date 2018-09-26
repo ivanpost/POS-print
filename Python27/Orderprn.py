@@ -6,9 +6,8 @@ import sys
 import shutil
 import time
 
-
-path = '/home/pi/Python2/'
-mpath = '/home/pi/Python2/Tmp/'
+path = '/var/www/html/joomla/spool/'
+mpath = '/var/www/html/joomla/spool/printed/'
 files = os.listdir(path)
 
 try:
@@ -22,7 +21,7 @@ if not txtfiles:
     sys.exit(0)
 	
 fil1nam = txtfiles[0]
-fil1opn = open(txtfiles[0])
+fil1opn = open(path + fil1nam)
 fil1cont = fil1opn.read()
 fil1opn.close()
 print path + fil1nam + '\n'
@@ -32,6 +31,7 @@ shutil.move(path + fil1nam, mpath + fil1nam)
 cutprn = chr(27) + chr(105)
 tstatus = chr(29) + chr(114) + chr(1)
 
+'''
 try:
     tn = telnetlib.Telnet("192.168.31.87", 9100, 3)
 except:
@@ -47,3 +47,26 @@ tn.write(tstatus)
 rstatus = tn.read_all()
 print str(rstatus)
 tn.close()
+'''
+import smtplib
+
+onump = fil1cont.find('Order number')
+
+if onump > 0:
+    sbjkt = 'Ord: ' + fil1cont[onump + 13 : onump + 22]
+else:
+    sbjkt = 'Temp'
+
+HOST = 'smtp.gmail.com'
+FROM = 'rest.goodkarma@gmail.com' 
+TO = 'x1076@yandex.ru'
+MESSAGE = 'Subject: ' + sbjkt + '\n\n' + fil1cont
+
+smtpObj = smtplib.SMTP(HOST, 587)
+smtpObj.starttls()
+smtpObj.login(FROM,'Rg**2')
+
+smtpObj.sendmail(FROM, TO, MESSAGE)
+smtpObj.quit()
+
+
